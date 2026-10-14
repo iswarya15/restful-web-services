@@ -7,11 +7,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.util.List;
 
 @RestController
-public class UserResource {
+public class UserController {
 
     private UserDaoService userDaoService;
 
-    public UserResource(UserDaoService userDaoService) {
+    public UserController(UserDaoService userDaoService) {
         this.userDaoService = userDaoService;
     }
 
@@ -20,11 +20,11 @@ public class UserResource {
         return userDaoService.findAll();
     }
 
-    @GetMapping(path="/users/{id}")
+    @GetMapping(path = "/users/{id}")
     public User retrieveUserById(@PathVariable Integer id) {
         User user = userDaoService.findOne(id);
-        if(user==null)
-            throw new UserNotFoundException("id "+id);
+        if (user == null)
+            throw new UserNotFoundException("id " + id);
         return user;
     }
 
@@ -38,5 +38,10 @@ public class UserResource {
                 .buildAndExpand(savedUser.getId())
                 .toUri();
         return ResponseEntity.created(location).build();
+    }
+
+    @DeleteMapping(path="/users/{id}")
+    public void deleteUser(@PathVariable int id) {
+        this.userDaoService.deleteById(id);
     }
 }
