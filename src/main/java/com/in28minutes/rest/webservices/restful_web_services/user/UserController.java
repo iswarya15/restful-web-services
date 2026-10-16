@@ -15,7 +15,7 @@ public class UserController {
         this.userDaoService = userDaoService;
     }
 
-    @GetMapping(path="/users")
+    @GetMapping("/users")
     public List<User> retrieveAllUsers() {
         return userDaoService.findAll();
     }
