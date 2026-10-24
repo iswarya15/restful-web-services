@@ -1,12 +1,22 @@
 package com.in28minutes.rest.webservices.restful_web_services.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
+@Entity(name = "user_details")
 public class User {
+
+    protected User() {
+
+    }
+
+    @Id
     private Integer id;
 
     @Size(min=2, message = "Name should atleast have 2 chars")
@@ -14,6 +24,8 @@ public class User {
     private String name;
 
     @Past(message="Birth Date should be in the past")
+    @JsonProperty("birthdate")
+    @Column(name = "birth_date")
     private LocalDate birthDate;
 
     public User(Integer id, String name, LocalDate birthDate) {
