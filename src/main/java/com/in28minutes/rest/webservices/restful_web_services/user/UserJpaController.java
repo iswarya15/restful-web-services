@@ -1,6 +1,9 @@
 package com.in28minutes.rest.webservices.restful_web_services.user;
 
+import com.in28minutes.rest.webservices.restful_web_services.Post;
+import com.in28minutes.rest.webservices.restful_web_services.jpa.PostRepository;
 import com.in28minutes.rest.webservices.restful_web_services.jpa.UserRepository;
+import jakarta.validation.Valid;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +23,12 @@ public class UserJpaController {
 
     private UserRepository userRepository;
 
-    public UserJpaController(UserDaoService userDaoService, UserRepository userRepository) {
+    private PostRepository postRepository;
+
+    public UserJpaController(UserDaoService userDaoService, UserRepository userRepository, PostRepository postRepository) {
         this.userDaoService = userDaoService;
         this.userRepository = userRepository;
+        this.postRepository = postRepository;
     }
 
     @GetMapping("/jpa/users")
@@ -61,5 +67,38 @@ public class UserJpaController {
     @DeleteMapping(path="/jpa/users/{id}")
     public void deleteUser(@PathVariable int id) {
         this.userRepository.deleteById(id);
+    }
+
+    @GetMapping("/jpa/users/{id}/posts")
+    public List<Post> retrieveAllPostsForUser(@PathVariable Integer id) {
+        Optional<User> user = userRepository.findById(id);
+
+        if(user.isEmpty())
+            throw new UserNotFoundException("id: " +id);
+
+        List<Post> posts = user.get().getPosts();
+
+        return posts;
+    }
+
+    @PostMapping(path="/jpa/users/{id}/posts")
+    public ResponseEntity<Object> createPostForUser(@PathVariable int id, @Valid @RequestBody Post post) {
+        Optional<User> user = userRepository.findById(id);
+
+        if(user.isEmpty())
+            throw new UserNotFoundException("id: " +id);
+
+        post.setUser(user.get());
+        Post savedPost = postRepository.save(post);
+
+        var location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(savedPost.getId())
+                .toUri();
+
+        //location = http://localhost:8080/jpa/users/15/posts/1
+
+        return ResponseEntity.created(location).build();
     }
 }
